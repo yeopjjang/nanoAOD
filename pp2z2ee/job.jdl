@@ -1,0 +1,33 @@
+## ---1. Basic set 
+executable = run_LNuLLA.sh
+universe = vanilla
+output   = condorLog/condorLog_$(Cluster)_$(Process).log
+error    = condorLog/condorLog_$(Cluster)_$(Process).log
+log      = /dev/null
+should_transfer_files = yes
+when_to_transfer_output = ON_EXIT
+
+## ---2. voms proxy init in condor job
+# You should first run the voms-proxy-init to use this option
+use_x509userproxy = True
+
+## ---3. Copy necessary files to condor directory (/srv)
+transfer_input_files = run_LNuLLA.sh, runStep1_LNuLLA.sh, runStep2_LNuLLA.sh, runStep3_LNuLLA.sh, runStep4_LNuLLA.sh,/cms/ldap_home/dylee/gridpack/test_slc6_amd64_gcc630_CMSSW_9_3_16_tarball.tar.xz,/tmp/x509up_u556951075
+
+
+## ---4. Copy output files to my condorOut directory
+transfer_output_files = condorOut 
+
+## ---5. Exclude some machines
+requirements = (machine != "cms-gpu01.sdfarm.kr")
+requirements = $(requirements) && ( HasSingularity == true )
+
+
+## Virtural container for SL6--##
+## If you run this script on SL7 evnironment
++SingularityImage = "/cvmfs/singularity.opensciencegrid.org/cmssw/cms:rhel6-m202001"
+
+
+arguments = $(Cluster) $(Process) 100
+queue 100
+
